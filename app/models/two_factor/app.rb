@@ -1,18 +1,8 @@
-# == Schema Information
-#
-# Table name: two_factors
-#
-#  id             :integer          not null, primary key
-#  member_id      :integer
-#  otp_secret     :string(255)
-#  last_verify_at :datetime
-#  activated      :boolean
-#  type           :string(255)
-#
-
 class TwoFactor::App < ::TwoFactor
 
   def verify(otp = nil)
+    return false if otp_secret.blank?
+
     rotp = ROTP::TOTP.new(otp_secret)
 
     if rotp.verify(otp || self.otp)
@@ -29,7 +19,7 @@ class TwoFactor::App < ::TwoFactor
 
   def uri
     totp = ROTP::TOTP.new(otp_secret)
-    totp.provisioning_uri("#{ENV['URL_HOST']}##{member.email}")
+    totp.provisioning_uri(member.email) + "&issuer=#{ENV['URL_HOST']}"
   end
 
   def now

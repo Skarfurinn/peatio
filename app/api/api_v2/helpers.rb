@@ -32,8 +32,8 @@ module APIv2
         source:        'APIv2',
         state:         ::Order::WAIT,
         member_id:     current_user.id,
-        ask:           current_market.target_unit,
-        bid:           current_market.price_unit,
+        ask:           current_market.base_unit,
+        bid:           current_market.quote_unit,
         currency:      current_market.id,
         ord_type:      attrs[:ord_type] || 'limit',
         price:         attrs[:price],
@@ -65,6 +65,19 @@ module APIv2
 
     def order_param
       params[:order_by].downcase == 'asc' ? 'id asc' : 'id desc'
+    end
+
+    def format_ticker(ticker)
+      { at: ticker[:at],
+        ticker: {
+          buy: ticker[:buy],
+          sell: ticker[:sell],
+          low: ticker[:low],
+          high: ticker[:high],
+          last: ticker[:last],
+          vol: ticker[:volume]
+        }
+      }
     end
 
   end

@@ -1,4 +1,4 @@
-Setup on Mac OS X 10.9 Mavericks
+Setup on Mac OS X 10.9 Mavericks for local development
 -------------------------------------
 
 ### Overview
@@ -10,7 +10,8 @@ Setup on Mac OS X 10.9 Mavericks
 5. Install [RabbitMQ](https://www.rabbitmq.com/)
 6. Install [Bitcoind](https://en.bitcoin.it/wiki/Bitcoind)
 7. Install [PhantomJS](http://phantomjs.org/)
-8. Configure Peatio
+8. Install ImageMagick
+9. Configure Peatio
 
 ### 1. Install Homebrew
 
@@ -62,11 +63,16 @@ Insert the following lines into the bitcoin.conf, and replce with your username 
 
     server=1
     daemon=1
-    rpcuser=INVENT_A_UNIQUE_USERNAME
-    rpcpassword=INVENT_A_UNIQUE_PASSWORD
 
     # If run on the test network instead of the real bitcoin network
     testnet=1
+
+    # You must set rpcuser and rpcpassword to secure the JSON-RPC api
+    # Please make rpcpassword to something secure, `5gKAgrJv8CQr2CGUhjVbBFLSj29HnE6YGXvfykHJzS3k` for example.
+    # Listen for JSON-RPC connections on <port> (default: 8332 or testnet: 18332)
+    rpcuser=INVENT_A_UNIQUE_USERNAME
+    rpcpassword=INVENT_A_UNIQUE_PASSWORD
+    rpcport=18332
 
     # Notify when receiving coins
     walletnotify=/usr/local/sbin/rabbitmqadmin publish routing_key=peatio.deposit.coin payload='{"txid":"%s", "channel_key":"satoshi"}'
@@ -82,6 +88,10 @@ Peatio uses Capybara with PhantomJS to do the feature tests, so if you want to r
     brew install phantomjs
 
 ### 8. Configure Peatio
+
+    brew install imagemagick
+
+### 9. Configure Peatio
 
 **Clone the project**
 

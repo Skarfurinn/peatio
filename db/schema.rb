@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140806141419) do
+ActiveRecord::Schema.define(version: 20140902112641) do
 
   create_table "account_versions", force: true do |t|
     t.integer  "member_id"
@@ -54,6 +54,7 @@ ActiveRecord::Schema.define(version: 20140806141419) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "trusted_ip_list"
+    t.string   "label"
   end
 
   add_index "api_tokens", ["access_key"], name: "index_api_tokens_on_access_key", unique: true, using: :btree
@@ -227,7 +228,9 @@ ActiveRecord::Schema.define(version: 20140806141419) do
   end
 
   add_index "orders", ["currency", "state"], name: "index_orders_on_currency_and_state", using: :btree
+  add_index "orders", ["member_id", "state"], name: "index_orders_on_member_id_and_state", using: :btree
   add_index "orders", ["member_id"], name: "index_orders_on_member_id", using: :btree
+  add_index "orders", ["state"], name: "index_orders_on_state", using: :btree
 
   create_table "partial_trees", force: true do |t|
     t.integer  "proof_id",   null: false
@@ -280,6 +283,15 @@ ActiveRecord::Schema.define(version: 20140806141419) do
 
   add_index "read_marks", ["member_id"], name: "index_read_marks_on_member_id", using: :btree
   add_index "read_marks", ["readable_type", "readable_id"], name: "index_read_marks_on_readable_type_and_readable_id", using: :btree
+
+  create_table "simple_captcha_data", force: true do |t|
+    t.string   "key",        limit: 40
+    t.string   "value",      limit: 6
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "simple_captcha_data", ["key"], name: "idx_key", using: :btree
 
   create_table "taggings", force: true do |t|
     t.integer  "tag_id"
@@ -347,6 +359,7 @@ ActiveRecord::Schema.define(version: 20140806141419) do
     t.datetime "last_verify_at"
     t.boolean  "activated"
     t.string   "type"
+    t.datetime "refreshed_at"
   end
 
   create_table "versions", force: true do |t|

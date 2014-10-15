@@ -1,15 +1,3 @@
-# == Schema Information
-#
-# Table name: two_factors
-#
-#  id             :integer          not null, primary key
-#  member_id      :integer
-#  otp_secret     :string(255)
-#  last_verify_at :datetime
-#  activated      :boolean
-#  type           :string(255)
-#
-
 require 'spec_helper'
 
 describe TwoFactor do
@@ -54,9 +42,9 @@ describe TwoFactor do
     its(:activated?) { should be_true }
   end
 
-  describe '#inactive!' do
+  describe '#deactive!' do
     subject { create :two_factor, activated: true }
-    before { subject.inactive! }
+    before { subject.deactive! }
 
     its(:activated?) { should_not be_true }
   end

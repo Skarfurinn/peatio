@@ -1,7 +1,4 @@
-class TokenMailer < ActionMailer::Base
-  include AMQPQueue::Mailer
-
-  default from: ENV['SYSTEM_MAIL_FROM']
+class TokenMailer < BaseMailer
 
   def reset_password(email, token)
     @token_url = edit_reset_password_url(token)
@@ -17,4 +14,5 @@ class TokenMailer < ActionMailer::Base
     @token_url = edit_activation_url token
     mail :to => email
   end
+
 end

@@ -1,20 +1,8 @@
-# == Schema Information
-#
-# Table name: two_factors
-#
-#  id             :integer          not null, primary key
-#  member_id      :integer
-#  otp_secret     :string(255)
-#  last_verify_at :datetime
-#  activated      :boolean
-#  type           :string(255)
-#
-
 class TwoFactor::Sms < ::TwoFactor
   OTP_LENGTH = 6
 
   def verify
-    if otp == otp_secret
+    if refreshed_at && Time.now < 30.minutes.since(refreshed_at) && otp == otp_secret
       touch(:last_verify_at)
     else
       errors.add :otp, :invalid
@@ -23,7 +11,7 @@ class TwoFactor::Sms < ::TwoFactor
   end
 
   def refresh
-    update otp_secret: OTP_LENGTH.times.map{ Random.rand(9) + 1 }.join
+    update otp_secret: OTP_LENGTH.times.map{ Random.rand(9) + 1 }.join, refreshed_at: Time.now
   end
 
   def sms_message

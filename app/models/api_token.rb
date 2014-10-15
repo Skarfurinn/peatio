@@ -1,16 +1,3 @@
-# == Schema Information
-#
-# Table name: api_tokens
-#
-#  id              :integer          not null, primary key
-#  member_id       :integer          not null
-#  access_key      :string(50)       not null
-#  secret_key      :string(50)       not null
-#  created_at      :datetime
-#  updated_at      :datetime
-#  trusted_ip_list :string(255)
-#
-
 class APIToken < ActiveRecord::Base
 
   belongs_to :member
@@ -23,6 +10,14 @@ class APIToken < ActiveRecord::Base
 
   def allow_ip?(ip)
     trusted_ip_list.blank? || trusted_ip_list.include?(ip)
+  end
+
+  def ip_whitelist=(list)
+    self.trusted_ip_list = list.split(/,\s*/)
+  end
+
+  def ip_whitelist
+    trusted_ip_list.try(:join, ',')
   end
 
   private

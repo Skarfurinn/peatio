@@ -43,6 +43,7 @@ Peatio::Application.routes.draw do
 
     resources :settings, only: [:index]
     resources :two_factors, only: [:show, :update, :edit, :destroy]
+    resources :api_tokens
 
     Currency.all.each do |c|
       resources "#{c.code}_fund_sources",
@@ -53,7 +54,11 @@ Peatio::Application.routes.draw do
     resources :deposits, only: [:index, :destroy, :update]
     namespace :deposits do
       Deposit.descendants.each do |d|
-        resources d.resource_name
+        resources d.resource_name do
+          collection do
+            post :gen_address
+          end
+        end
       end
     end
 

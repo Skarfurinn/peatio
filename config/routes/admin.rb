@@ -4,7 +4,6 @@ namespace :admin do
   resources :documents
   resources :id_documents,     only: [:index, :show, :update]
   resource  :currency_deposit, only: [:new, :create]
-  resources :members,          only: [:index, :show, :update]
   resources :proofs
   resources :tickets, only: [:index, :show] do
     member do
@@ -13,10 +12,12 @@ namespace :admin do
     resources :comments, only: [:create]
   end
 
-  resources :members, :only => [:index, :show, :update] do
+  resources :members, only: [:index, :show, :update] do
     member do
       post :toggle
     end
+
+    resources :two_factors, only: [:destroy]
   end
 
   namespace :deposits do

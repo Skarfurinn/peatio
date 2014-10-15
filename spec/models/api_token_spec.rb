@@ -1,16 +1,3 @@
-# == Schema Information
-#
-# Table name: api_tokens
-#
-#  id              :integer          not null, primary key
-#  member_id       :integer          not null
-#  access_key      :string(50)       not null
-#  secret_key      :string(50)       not null
-#  created_at      :datetime
-#  updated_at      :datetime
-#  trusted_ip_list :string(255)
-#
-
 require 'spec_helper'
 
 describe APIToken do
@@ -44,4 +31,8 @@ describe APIToken do
     token.allow_ip?('127.0.0.2').should == false
   end
 
+  it "should tranlsate comma seperated whitelist to trusted ip list" do
+    token.ip_whitelist = "127.0.0.1, 127.0.0.2,127.0.0.3"
+    token.trusted_ip_list = %w(127.0.0.1 127.0.0.2 127.0.0.3)
+  end
 end

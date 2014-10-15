@@ -1,26 +1,3 @@
-# == Schema Information
-#
-# Table name: withdraws
-#
-#  id         :integer          not null, primary key
-#  sn         :string(255)
-#  account_id :integer
-#  member_id  :integer
-#  currency   :integer
-#  amount     :decimal(32, 16)
-#  fee        :decimal(32, 16)
-#  fund_uid   :string(255)
-#  fund_extra :string(255)
-#  created_at :datetime
-#  updated_at :datetime
-#  done_at    :datetime
-#  txid       :string(255)
-#  aasm_state :string(255)
-#  sum        :decimal(32, 16)  default(0.0), not null
-#  type       :string(255)
-#  bsb        :string(255)
-#
-
 class Withdraw < ActiveRecord::Base
   STATES = [:submitting, :submitted, :rejected, :accepted, :suspect, :processing,
             :coin_ready, :coin_done, :done, :canceled, :almost_done, :failed]
@@ -80,10 +57,6 @@ class Withdraw < ActiveRecord::Base
     !coin?
   end
 
-  def audit
-    AMQPQueue.enqueue(:withdraw_audit, id: id) if submitted?
-  end
-
   def position_in_queue
     last_done = Rails.cache.fetch(last_completed_withdraw_cache_key) do
       self.class.completed.maximum(:id)
@@ -104,9 +77,9 @@ class Withdraw < ActiveRecord::Base
 
   aasm :whiny_transitions => false do
     state :submitting,  initial: true
-    state :submitted,   after_commit: :audit
+    state :submitted
     state :canceled,    after_commit: :send_email
-    state :accepted
+    state :accepted,    after_commit: :send_email
     state :suspect,     after_commit: :send_email
     state :rejected,    after_commit: :send_email
     state :processing,  after_commit: :send_coins!
@@ -164,6 +137,10 @@ class Withdraw < ActiveRecord::Base
     submitting? or submitted? or accepted?
   end
 
+  def quick?
+    sum <= currency_obj.quick_withdraw_max
+  end
+
   private
 
   def lock_funds
@@ -186,7 +163,14 @@ class Withdraw < ActiveRecord::Base
   end
 
   def send_email
-    WithdrawMailer.withdraw_state(self.id).deliver
+    case aasm_state
+    when 'accepted'
+      WithdrawMailer.accepted(self.id).deliver
+    when 'done'
+      WithdrawMailer.done(self.id).deliver
+    else
+      WithdrawMailer.withdraw_state(self.id).deliver
+    end
   end
 
   def send_coins!
